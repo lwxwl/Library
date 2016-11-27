@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">OurDays</string>
+    <string name="hint">今天想要看什么书呢o(^▽^)o</string>
+    <string name="button_name">GO ON</string>
+</resources>
