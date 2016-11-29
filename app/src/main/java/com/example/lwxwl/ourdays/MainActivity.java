@@ -1,43 +1,36 @@
 package com.example.lwxwl.ourdays;
 
-import android.app.Activity;
-import android.app.Notification;
-import android.net.Uri;
+import android.app.Activity;;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.appindexing.Thing;
-import com.google.android.gms.common.api.GoogleApiClient;
+import android.widget.SimpleAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends Activity implements View.OnClickListener {
+
 
     public static final int SHOW_RESPONSE = 0;
     private EditText edt;
     private Button btn;
     private TextView rtv;
+    private TextView rtv2;
+    private List<Book> bookList  = new ArrayList<Book>();
 
     public Handler handler = new Handler() {
         public void handleMessage(Message msg) {
@@ -45,6 +38,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 case SHOW_RESPONSE:
                     String response = (String) msg.obj;
                     rtv.setText(response);
+                    parseJSONWithJSONObject(response.toString());
             }
         }
     };
@@ -54,9 +48,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        rtv = (TextView) findViewById(R.id.rtv);
+        rtv2 = (TextView) findViewById(R.id.rtv2);
         edt = (EditText) findViewById(R.id.edt);
         btn = (Button) findViewById(R.id.btn);
-        rtv = (TextView) findViewById(R.id.rtv);
         btn.setOnClickListener(this);
     }
 
@@ -91,7 +86,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     msg.what = SHOW_RESPONSE;
                     msg.obj = response.toString();
                     handler.sendMessage(msg);
-                    parseJSONWithJSONObject(edt.getText().toString());
+
                 } catch (Exception exc) {
                     exc.printStackTrace();
                 } finally {
@@ -106,15 +101,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     public void parseJSONWithJSONObject(String jsonData) {
         try {
-            JSONArray jsonArray = new JSONArray(jsonData);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonQbject = jsonArray.getJSONObject(i);
-                String count = jsonQbject.getString("count");
-                String name = jsonQbject.getString("name");
-                String title = jsonQbject.getString("title");
-                Log.d("MainActivity", "count is " + count);
-                Log.d("MainActivity", "name is " + name);
-                Log.d("MainActivity", "title is " + title);
+            JSONObject object = new JSONObject(jsonData);
+            int total = object.getInt("total");
+            JSONArray array = object.getJSONArray("books");
+            bookList = new ArrayList<>();
+            for (int i = 0; i < array.length(); i++) {
+                Book book = new Book();
+                book.title = ((JSONObject)array.get(i)).getString("title");
+                book.summary = ((JSONObject)array.get(i)).getString("summary");
+                bookList.add(book);
             }
         } catch (Exception exc) {
             exc.printStackTrace();
